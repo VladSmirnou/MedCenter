@@ -1,0 +1,7 @@
+<form>
+    <label for="search">Search for a certain appointment (type an appointment number)</label>
+    <p><input id="search" type="number" name="search" hx-get="{% url 'search' %}" hx-trigger="keyup delay:500ms" hx-target="#appointments"></p>
+</form>
+<div id="appointments">
+    {% include 'appointment-list.html' %}
+</div>

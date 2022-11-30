@@ -1,0 +1,12 @@
+<div>
+    <label for="med-centers">Pick a med-center:</label>
+</div>
+<select id="med-centers" hx-get="{% url 'chain-drop' %}" name="med-center" hx-trigger="change" hx-target="#med-types">
+    <option selected>Open this menu</option>
+    {% for center in centers %}
+        <option value="{{ center }}">{{ center }}</option>
+    {% endfor %}
+</select>
+<div id="med-types">
+    {% include 'partials/med-type.html' %}
+</div>

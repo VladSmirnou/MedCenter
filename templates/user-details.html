@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="aboveline">
+    <h3>
+        <a 
+        style="color: blue; cursor: pointer;"
+        hx-get="{% url 'home' %}"
+        hx-target="#main"
+        >Back to a home page
+        </a>
+    </h3>
+    <br/>
+    <div id="pageinfo">
+        <div>
+            <p>
+                <b>First name:</b> {{ fname }}
+            </p>
+            <p>
+                <b>Last name:</b> {{ lname }}
+            </p>
+            <p>
+                <b>Email address:</b> {{ email }}
+            </p>
+            <p>
+                <b>Mobile phone:</b> {{ mobile }}
+            </p>
+        </div>
+
+        <p>
+            <a 
+            style="color: rgb(177, 23, 223); cursor: pointer;"
+            hx-get="{% url 'user-appointments' %}"
+            hx-target="#pageinfo"
+            >My appointments
+            </a>
+        </p>
+        
+        <hr>
+        {% if messages %}
+            <ul class="messages" hx-get="{% url 'clear' %}" hx-trigger="load delay:3s">
+                {% for message in messages %}
+                    <li style="color: green;" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+            </ul>
+        {% endif %}  
+        <div id="accounts">
+            <p></p> 
+            <span>
+                <a 
+                style="color: blue; cursor: pointer;"
+                hx-get="{% url 'user-accounts' %}"
+                hx-target="#accounts"
+                >My accounts
+                </a>
+            </span>
+            <span> |
+                <a 
+                style="color: rgb(61, 174, 55); cursor: pointer;"
+                hx-get="{% url 'create-account' %}"
+                hx-target="#accounts"
+                >Create an account
+                </a>
+            </span> 
+            <div>
+                <p>
+                    <a 
+                    style="cursor: pointer;"
+                    >Change password
+                    </a>
+                </p>
+            </div>
+            <div>
+                <a
+                style="color: rgb(221, 29, 29); cursor: pointer;"
+                >Delete profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

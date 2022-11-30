@@ -1,0 +1,10 @@
+<p>Max amount of a single transfer is 5000 $</p>
+<form>
+    {% csrf_token %} 
+    <input type="number" name="amount">
+    <button hx-post="{% url 'account-transfer' account.pk %}" hx-target="#transaction">Submit</button>
+</form>
+{% if negative %}
+    <p style="color: red;">You dont have enough money</p>
+{% endif %}
+

@@ -1,0 +1,1 @@
+from medcenter.models import *

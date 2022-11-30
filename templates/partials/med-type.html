@@ -1,0 +1,12 @@
+<div>
+    <label for="med-type">Pick med-type:</label>
+</div>
+<select id="med-type" hx-get="{% url 'chain-drop' %}" name="med-type" hx-trigger="change" hx-target="#doctors-name">
+    <option selected>Open this menu</option>
+    {% for type in types %}
+        <option value="{{ type }}">{{ type }}</option>
+    {% endfor %}
+</select>
+<div id="doctors-name">
+    {% include 'partials/doctor-name.html' %}
+</div>

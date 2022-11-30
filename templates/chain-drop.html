@@ -1,0 +1,13 @@
+<div id="main">
+    <label for="cities">Pick a city:</label>
+</div>
+<select id="cities" name="city" hx-get="{% url 'chain-drop' %}" hx-trigger="change" hx-target="#med-center">
+    <option selected>Open this menu</option>
+    {% for city in cities %}
+        <option value="{{ city }}">{{ city }}</option>
+    {% endfor %}
+</select>
+<div id="med-center">
+    {% include 'partials/med-center.html' %}
+</div>
+

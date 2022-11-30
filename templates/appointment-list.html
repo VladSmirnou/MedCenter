@@ -1,0 +1,35 @@
+{% if not appointments %}
+    <p>You dont have any appointments</p>
+    {% else %}
+        {% for appointment in appointments %}
+            <p><b>Appointment number: {{ appointment.AppID }}</b></p>
+            {{ appointment.AppCity }}
+            {{ appointment.AppClinicName }}
+            {{ appointment.AppMedCategory }}
+            {{ appointment.AppDoctor_Full_Name }}
+            <p>
+                {% csrf_token %} 
+                <span
+                style="color: rgb(228, 19, 19); cursor: pointer;"
+                hx-delete="{% url 'delete-appointment' appointment.pk %}"
+                hx-target="#pageinfo"
+                hx-confirm="Are you sure wish to delete this appointment?"
+                >Delete an appointment
+                </span> |
+
+                <span 
+                style="color: blue; cursor: pointer;"
+                >Register an appointment
+                </span>
+            </p>
+            <br/>
+        {% endfor %}
+    {% endif %}
+    <p>
+        <a
+        style="color: blue; cursor: pointer;"
+        hx-get="{% url 'user-details' %}"
+        hx-target="#aboveline"
+        >Back to my info
+        </a>
+    </p>

@@ -1,0 +1,6 @@
+<p>Max amount of a single transaction is 10000 $</p>
+<form>
+    {% csrf_token %} 
+    <input type="number" name="amount">
+    <button hx-post="{% url 'user-transaction' account.pk %}" hx-target="#trblock">Submit</button>
+</form>

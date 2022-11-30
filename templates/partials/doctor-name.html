@@ -1,0 +1,13 @@
+<div>
+    <label for="doctors">Pick a doctor:</label>
+</div>
+<select id="doctors" hx-get="{% url 'chain-drop' %}" name="doctor-name" hx-trigger="change" hx-target="#description">
+    <option selected>Open this menu</option>
+    {% for doctor in doctors %}
+        <option value="{{ doctor }}">{{ doctor }}</option>
+    {% endfor %}
+</select>
+<div id="description">
+    {{ description }}
+</div>
+

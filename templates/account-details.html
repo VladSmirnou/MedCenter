@@ -1,0 +1,32 @@
+<div id="trblock"> 
+    <p>
+        <a 
+        style="color: blue; cursor: pointer;"
+        hx-get="{% url 'user-accounts' %}"
+        hx-target="#accounts"
+        >Back
+        </a>
+    </p>
+    <p>{{ account.Account_Type }} account current balance is: {{ account.Balance }} $</p>
+    {% if account.Account_Type == 'Debit' %}
+    <div id="transaction">
+        <span
+        style="color: blue; cursor: pointer;"
+        hx-get="{% url 'user-transaction' account.pk %}"
+        hx-target="#transaction"
+        >Make a transaction 
+        </span>to the "Debit" account or
+        <span
+        hx-get="{% url 'account-transfer' account.pk %}"
+        hx-target="#transaction"
+        style="color: blue; cursor: pointer;"
+        >transfer money</span>
+            <span>
+                to the 'Credit' account.
+            </span>
+        </span>
+    </div>
+    {% else %}
+        <p>You can get bonuses for storing money in here</p>
+    {% endif %}
+</div>

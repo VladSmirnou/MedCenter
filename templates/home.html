@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="main">
+    <h2>Home page</h2>
+
+    {% if user.is_authenticated %}
+        Hello! {{ user.username }}
+        <br/>
+        <span>
+            <br/>
+            <a href="{% url 'logout' %}">Log Out</a> |
+        </span>
+        <span 
+            style="color: blue; cursor: pointer;"
+            hx-get="{% url 'user-details' %}"
+            hx-target="#main"
+            >My info
+        </span>
+
+        <form>
+            <br/>
+            {% include 'chain-drop.html' %}
+            <div>
+                <br/>
+                <button hx-post="{% url 'create-appointment' %}" hx-target="#main">Create an appointment</button>
+            </div>
+        </form>
+        {% if declined %}
+            <p style="color: red;">{{ declined }}</p>
+        {% endif %}
+    {% else %}
+        <div>
+            <span>
+                <a href="{% url 'signup' %}">Sign up</a>
+            </span>|
+            <span>
+                <a href="{% url 'login' %}">Log In</a>
+            </span>
+        </div>
+        <p>Log in to make an appointment</p>
+    {% endif %}
+</div>
+{% endblock content %}

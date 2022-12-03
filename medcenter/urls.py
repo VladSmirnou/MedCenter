@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth.views import LogoutView
 from .views import (
     home,
     chain_drop,
@@ -12,10 +13,17 @@ from .views import (
     transactions,
     clear,
     account_transfer,
-    search)
+    search,
+    delete_user,
+    SignUpView,
+    Login
+    )
 
 urlpatterns = [
     path("", home, name='home'),
+    path("signup/", SignUpView.as_view(), name='signup'),
+    path("login/", Login.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]
 
 htmx_patterns = [
@@ -29,6 +37,7 @@ htmx_patterns = [
     path('delete-appointment/<int:pk>/', delete_appointment, name='delete-appointment'),
     path('user-transaction/<int:pk>/', transactions, name='user-transaction'),
     path('account-transfer/<int:pk>/', account_transfer, name='account-transfer'),
+    path('delete-user/<int:pk>/', delete_user, name='delete-user'),
     path('clear/', clear, name='clear'),
     path('search/', search, name='search'),
 ]

@@ -1,15 +1,49 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from .validators import validate_email, validate_phone, validate_users
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomUser(AbstractUser):
     UserID = models.BigAutoField(primary_key=True)
-    UserFirst_Name = models.CharField(max_length=30)
-    UserLast_Name = models.CharField(max_length=30)
-    UserMobile_Phone = models.CharField(max_length=30)
-    UserEmail = models.CharField(max_length=100)
-    REQUIRED_FIELDS = ["UserFirst_Name", "UserLast_Name"]
+    first_name = models.CharField(
+        max_length=32,
+        validators=[validate_users],
+        db_column="UserFirst_Name",
+        verbose_name="First name",
+        help_text=_(
+        "This fields is required. Should be more than or equal to 5 \
+        and less than or equal to 25 characters. Accepts only lower and upper letters and digits."
+        ),
+    )
+    last_name = models.CharField(
+        max_length=32,
+        validators=[validate_users],
+        db_column="UserLast_Name",
+        verbose_name="Last name",
+        help_text=_(
+        "This fields is required. Should be more than or equal to 5 \
+        and less than or equal to 25 characters. Accepts only lower and upper letters and digits."
+        ),
+    )
+    UserMobile_Phone = models.CharField(
+        max_length=32,
+        validators=[validate_phone],
+        blank=True,
+        verbose_name="Mobile phone",
+        help_text=_(
+            "Not required. Standart format is -> +XXX (XX) XXX-XXX-XXXX"
+        ),
+    )
+    email = models.EmailField(
+        max_length=128,
+        validators=[validate_email],
+        blank=True,
+        db_column='UserEmail',
+    )
+
+    REQUIRED_FIELDS = ["first_name", "last_name"]
 
     def __str__(self):
         return f"User ID: {self.UserID}"
@@ -64,3 +98,4 @@ class UserAppointment(models.Model):
     AppClinicName = models.CharField(max_length=20)
     AppMedCategory = models.CharField(max_length=40)
     AppDoctor_Full_Name = models.CharField(max_length=30)
+    

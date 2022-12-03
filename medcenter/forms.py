@@ -6,10 +6,10 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm):
         model = CustomUser
         fields = UserCreationForm.Meta.fields + (
-            "UserFirst_Name",
-            "UserLast_Name",
+            "first_name",
+            "last_name",
             "UserMobile_Phone",
-            "UserEmail",
+            "email",
         )
 
 

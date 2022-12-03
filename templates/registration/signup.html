@@ -1,8 +1,54 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign Up</button>
+<form action="{% url 'signup' %}" method="post" autocomplete="off">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="fieldWrapper">
+        {{ form.username.errors }}
+        <label for="{{ form.username.id_for_label }}">Username:</label>
+        {{ form.username }} This fields is required. 
+    </div>
+
+    <div class="fieldWrapper">
+        {{ form.first_name.errors }}
+        <label for="{{ form.first_name.id_for_label }}">First name:</label>
+        {{ form.first_name }} {{ form.first_name.help_text }}
+    </div>
+    
+    <div class="fieldWrapper">
+        {{ form.last_name.errors }}
+        <label for="{{ form.last_name.id_for_label }}">Last name:</label>
+        {{ form.last_name }} {{ form.last_name.help_text }}
+    </div>
+
+    <div class="fieldWrapper">
+        {{ form.UserMobile_Phone.errors }}
+        <label for="{{ form.UserMobile_Phone.id_for_label }}">Mobile Phone:</label>
+        {{ form.UserMobile_Phone }} {{ form.UserMobile_Phone.help_text }}
+    </div>
+
+    <div class="fieldWrapper">
+        {{ form.email.errors }}
+        <label for="{{ form.email.id_for_label }}">Email:</label>
+        {{ form.email }} Not required. Length of the part before '@' symbol should be more than or equal to 5
+        and less than or equal to 50 characters. Accepts only lower and upper letters and digits. 
+        Also only ...@gmail.com and ...@yandex.ru are allowed.
+    </div>
+
+    <div class="fieldWrapper">
+        {{ form.password1.errors }}
+        <label for="{{ form.password1.id_for_label }}">Password:</label>
+        {{ form.password1 }} 
+    </div>
+
+    <div class="fieldWrapper">
+        {{ form.password2.errors }}
+        <label for="{{ form.password2.id_for_label }}">Confirm password:</label>
+        {{ form.password2 }} 
+    </div>
+
+    <input type="submit" value="Submit">
 </form>
 {% endblock content %}

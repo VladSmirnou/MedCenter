@@ -72,6 +72,9 @@
             <div>
                 <a
                 style="color: rgb(221, 29, 29); cursor: pointer;"
+                hx-delete="{% url 'delete-user' user.pk %}"
+                hx-target="#main"
+                hx-confirm="Are you sure want to delete this account? This action cannot be undone!"
                 >Delete profile
                 </a>
             </div>

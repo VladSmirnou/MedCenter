@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "medcenter.apps.MedcenterConfig",
-    "signup.apps.SignupConfig"
 ]
 
 MIDDLEWARE = [
@@ -136,3 +135,4 @@ AUTH_USER_MODEL = "medcenter.CustomUser"
 
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+

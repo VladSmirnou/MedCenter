@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .models import UserAccount, CustomUser, UserAppointment, UserTransaction
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.views.generic import CreateView
+from .forms import CustomUserCreationForm
+from django.contrib.auth.views import LoginView
 
 
 CITIES = ('City1', 'City2')
@@ -78,9 +82,9 @@ def chain_drop(request):
 def user_details(request):
     current_user = request.user
     return render(request, 'user-details.html', {
-    'fname': current_user.UserFirst_Name,
-    'lname': current_user.UserLast_Name,
-    'email': current_user.UserEmail,
+    'fname': current_user.first_name,
+    'lname': current_user.last_name,
+    'email': current_user.email,
     'mobile': current_user.UserMobile_Phone
     })
 
@@ -195,5 +199,21 @@ def search(request):
     return render(request, 'appointment-list.html', {'appointments': filtered})
 
 
+def delete_user(request, pk):
+    # check if a user has money on balance, if does -> do not allow to delete
+    CustomUser.objects.get(UserID=pk).delete()
+    return redirect('home')
+
+
 def clear(request):
     return HttpResponse('')
+
+
+class SignUpView(CreateView):
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('login')
+    template_name = 'registration/signup.html'
+
+
+class Login(LoginView):
+    template_name = 'registration/login.html'

@@ -1,6 +1,9 @@
-{% extends 'base.html' %}
-
-{% block content %}
+<a
+style="color: blue; cursor: pointer;"
+href="{% url 'home' %}"
+>Back to a home page
+</a>
+<p></p>
 <form action="{% url 'signup' %}" method="post" autocomplete="off">
     {% csrf_token %}
     {{ form.non_field_errors }}
@@ -8,7 +11,7 @@
     <div class="fieldWrapper">
         {{ form.username.errors }}
         <label for="{{ form.username.id_for_label }}">Username:</label>
-        {{ form.username }} This fields is required. 
+        {{ form.username }} This fields is required. 150 characters or fewer. Usernames may contain alphanumeric, _, @, +, . and - characters.
     </div>
 
     <div class="fieldWrapper">
@@ -32,9 +35,10 @@
     <div class="fieldWrapper">
         {{ form.email.errors }}
         <label for="{{ form.email.id_for_label }}">Email:</label>
-        {{ form.email }} Not required. Length of the part before '@' symbol should be more than or equal to 5
+        {{ form.email }} Required. Length of the part before '@' symbol should be more than or equal to 5
         and less than or equal to 50 characters. Accepts only lower and upper letters and digits. 
-        Also only ...@gmail.com and ...@yandex.ru are allowed.
+        Also only ...@gmail.com is available. Verification link lasts only 3 hours. After that 
+        inactive account would be deleted
     </div>
 
     <div class="fieldWrapper">
@@ -51,4 +55,3 @@
 
     <input type="submit" value="Submit">
 </form>
-{% endblock content %}

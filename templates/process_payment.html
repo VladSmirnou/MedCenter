@@ -1,0 +1,12 @@
+<h4>Pay with PayPal!</h4>
+<h3>Appointment number: {{ order_details.AppID }}</h3>
+{{ order_details }}
+<p></p>
+{{ form.render }}
+<p></p>
+<a
+style="color: blue; cursor: pointer;"
+hx-get="{% url 'user-details' %}"
+hx-target="#aboveline"
+>Back to my info
+</a>

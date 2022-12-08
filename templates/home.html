@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
+{% load static %}    
 {% block content %}
 <div id="main">
     <h2>Home page</h2>
-
     {% if user.is_authenticated %}
         Hello! {{ user.username }}
         <br/>
@@ -25,19 +25,58 @@
                 <button hx-post="{% url 'create-appointment' %}" hx-target="#main">Create an appointment</button>
             </div>
         </form>
-        {% if declined %}
-            <p style="color: red;">{{ declined }}</p>
+        <p></p>
+        {% if messages %}
+            <ul class="messages" hx-get="{% url 'clear' %}" hx-trigger="load delay:5s">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                    <li style="color: red;">{{ message }}</li>
+                {% else %}
+                    <li style="color: green;">{{ message }}</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
         {% endif %}
+
     {% else %}
         <div>
             <span>
-                <a href="{% url 'signup' %}">Sign up</a>
+                <a
+                style="color: blue; cursor: pointer;"
+                hx-get="{% url 'signup' %}"
+                hx-target="#main"
+                >Sign up
+                </a>
             </span>|
             <span>
-                <a href="{% url 'login' %}">Log In</a>
+                <a 
+                style="color: blue; cursor: pointer;"
+                hx-get="{% url 'login' %}"
+                hx-target="#main"
+                >Log in
+                </a>
+            </span>
+            <span>|
+            <a 
+            href="{% url 'password_reset' %}"
+            style="color: blue; cursor: pointer;"
+            >Restore a password
+            </a>
             </span>
         </div>
         <p>Log in to make an appointment</p>
+        {% if messages %}
+                <ul class="messages" hx-get="{% url 'clear' %}" hx-trigger="load delay:3s">
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <li style="color: green;">{{ message }}</li>
+                        {% else %}
+                            <li style="color: red;">{{ message }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+        {% endif %}
     {% endif %}
 </div>
+<div hx-get="{% url 'inactive_user_clean' %}" hx-trigger="every 10800s" hx-target="#main"></div>
 {% endblock content %}

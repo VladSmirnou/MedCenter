@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import Employee, CustomUser, UserAccount, UserTransaction, UserAppointment
+from .models import Employee, CustomUser, UserAppointment
 
 
 class CustomUserAdmin(UserAdmin):
@@ -20,13 +20,13 @@ class CustomUserAdmin(UserAdmin):
         (None, {"fields": ("UserMobile_Phone",)}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {"fields": ('UserMobile_Phone', 'first_name', 'last_name', 'UserMobile_Phone', 'email')}),
+        (None, {"fields": ('first_name', 'last_name', 'UserMobile_Phone', 'email')}),
     )
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
 
 
-@admin.register(Employee, UserAccount, UserTransaction, UserAppointment)
+@admin.register(Employee, UserAppointment)
 class RegAdmin(admin.ModelAdmin):
     pass

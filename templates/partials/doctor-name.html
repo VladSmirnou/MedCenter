@@ -5,9 +5,9 @@
     <option selected>Open this menu</option>
     {% for doctor in doctors %}
         <option value="{{ doctor }}">{{ doctor }}</option>
-    {% endfor %}
-</select>
+        {% endfor %}
+    </select>
 <div id="description">
-    {{ description }}
+    {{ str_descriprion }}
 </div>
 

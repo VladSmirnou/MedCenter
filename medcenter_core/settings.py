@@ -29,7 +29,7 @@ SECRET_KEY = env.str("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "medcenter.apps.MedcenterConfig",
+    "paypal.standard.ipn"
 ]
 
 MIDDLEWARE = [
@@ -136,3 +137,25 @@ AUTH_USER_MODEL = "medcenter.CustomUser"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
+
+# email verification config
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+email = env.dj_email_url("EMAIL_URL", default="smtp://")
+DEFAULT_FROM_EMAIL = email["DEFAULT_FROM_EMAIL"]
+EMAIL_HOST = email["EMAIL_HOST"]
+EMAIL_PORT = email["EMAIL_PORT"]
+EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
+EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
+
+PASSWORD_RESET_TIMEOUT = 10800
+
+# Paypal config 
+# Since 2022.12.07 there is no ipn comming back from PayPal side idk why.
+# Payments register on the PayPal dashboard and money transfer between personal and business accounts.
+# Return and cancel functions do the job, but there is no ipn from PayPal after that, so i cant change 'paid' flag to True via a signal
+# Seems like ngrok works as well, maybe my internet provider issue, or temp PayPal maintenance work
+PAYPAL_TEST = True
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
+PAYPAL_RECEIVER_EMAIL = env.str("PAYPAL_RECEIVER_EMAIL")

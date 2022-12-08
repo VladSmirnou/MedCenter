@@ -1,3 +1,9 @@
+<a
+style="color: blue; cursor: pointer;"
+href="{% url 'home' %}"
+>Back to a home page
+</a>
+<p></p>
 <form method="POST" action="{% url 'login' %}" autocomplete="off">
     {% csrf_token %}
     {{ form.non_field_errors }}
@@ -16,3 +22,10 @@
     
     <button type="submit" class="btn btn-success mt-2">Login</button>
 </form>
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

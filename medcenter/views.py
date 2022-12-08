@@ -1,23 +1,34 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from .models import UserAccount, CustomUser, UserAppointment, UserTransaction
-from django.contrib import messages
-from django.views.decorators.http import require_http_methods
-from django.views.generic import CreateView
-from .forms import CustomUserCreationForm
+from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.views import LoginView
+from django.contrib.auth import get_user_model
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from django.core.mail import EmailMessage
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
+from django.urls import reverse_lazy, reverse
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.views.generic import CreateView
+from django.views.decorators.http import require_http_methods
+
+from paypal.standard.forms import PayPalPaymentsForm
+
+from .forms import CustomUserCreationForm
+from .models import CustomUser, UserAppointment
+from .tokens import account_activation_token
 
 
 CITIES = ('City1', 'City2')
 CENTERS = ('Center1', 'Center2', 'Center3', 'Center4')
 MED_TYPE = ('Cardiology', 'Eye care', 'Psycology', 'Primary care')
 DOCTORS = (
-    {'Cardiolog1': 'Super cool' , 'Cardiolog2': 'Amaizing'},
-    {'Eye Doc1': 'Nice', 'Eye Doc2': 'Good one'},
-    {'Psycologist1': 'Trustfull', 'Psycologist2': 'Gorgeous'},
-    {'Terapist1': 'Fabilous', 'Terapist2': 'Spectacular'}
+    {'Cardiolog1': ['Super cool', 15] , 'Cardiolog2': ['Amaizing', 12]},
+    {'Eye Doc1': ['Nice', 11], 'Eye Doc2': ['Good one', 13]},
+    {'Psycologist1': ['Trustfull', 13], 'Psycologist2': ['Gorgeous', 12]},
+    {'Terapist1': ['Fabilous', 12], 'Terapist2': ['Spectacular', 14]}
 )
 
 
@@ -25,6 +36,57 @@ def home(request):
     return render(request, "home.html", {"cities": CITIES})
 
 
+def activate(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except:
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, 'Thank you for your confirmation, you are now able to login')
+        return redirect('login')
+    else:
+        messages.error(request, 'Activation link is invalid. Try again')
+    return redirect('home')
+
+
+def activateEmail(request, user, to_email):
+    mail_subject = "Activate your user account"
+    message = render_to_string('registration/template_activate_account.html', {
+        'user': user.username,
+        'domain': get_current_site(request).domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+        'protocol': "https" if request.is_secure() else "http" 
+    })
+    email = EmailMessage(mail_subject, message, to=[to_email])
+    if email.send():
+        messages.success(request, f'User {user} go to {to_email} and activate your email.')
+    else:
+        messages.error(request, f'Problem sending email to {to_email}, check if you typed it correctly')
+
+
+class SignUpView(CreateView):
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('home')
+    template_name = 'registration/signup.html'
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.is_active = False
+        user.save()
+        activateEmail(self.request, user, form.cleaned_data.get('email'))
+        return super().form_valid(form)
+
+
+class Login(LoginView):
+    template_name = 'registration/login.html'
+
+
+@login_required
 def chain_drop(request):
     
     '''
@@ -73,9 +135,12 @@ def chain_drop(request):
     #description block
     if (req:= request.GET.get('doctor-name')):
         for dictionary in DOCTORS:
-            description = dictionary.get(req)
-            if description:
-                return HttpResponse(description)
+            description_list = dictionary.get(req)
+            if description_list:
+                description = description_list[0]
+                price = description_list[1]
+                str_descriprion = f'This doctor is {description}, Price: {price}'
+                return HttpResponse(str_descriprion)
 
 
 @login_required
@@ -90,48 +155,27 @@ def user_details(request):
 
 
 @login_required
-def user_accounts(request):
-    current_user = request.user
-    user_accounts = UserAccount.objects.filter(userid=current_user)
-    return render(request, 'user-accounts.html', {'accounts': user_accounts})
-
-
-@login_required
-def create_account(request):
-    current_user = request.user
-    if request.method == 'GET':
-        user_accounts = UserAccount.objects.filter(userid=current_user)
-        return render(request, 'create-account.html', {'accounts': user_accounts})
-    account_type = request.POST.get('account-type')
-    UserAccount.objects.create(userid=current_user, Account_Type=account_type)
-    messages.success(request, f'Your {account_type} account was successfully created')
-    return redirect('user-details')
-
-
-@login_required
-def account_details(request, pk):
-    user_account = UserAccount.objects.get(pk=pk)
-    return render(request, 'account-details.html', {'account': user_account})
-
-
-@login_required
 def create_appointment(request):
-    # add the success signal in html
-    # maybe change POST method to PUT later
     if 'Open this menu' in [request.POST[i] for i in request.POST]:
+        messages.error(request, 'Declined: Pick all fields.')
         return render(request, "home.html", {
             'cities': CITIES,
-            'declined': 'Declined: Pick all fields.'
         })
     user_info, current_user = request.POST, request.user
+    for item in DOCTORS:
+        price = item.get(user_info.get('doctor-name'))
+        if price:
+            break
     user_object = CustomUser.objects.get(UserID=current_user.UserID)
     UserAppointment.objects.create(
         userid=user_object,
         AppCity=user_info.get('city'),
         AppClinicName=user_info.get('med-center'),
         AppMedCategory=user_info.get('med-type'),
-        AppDoctor_Full_Name=user_info.get('doctor-name')
+        AppDoctor_Full_Name=user_info.get('doctor-name'),
+        Price=int(price[1])
         )
+    messages.success(request, 'your appointment was succesfully created')
     return render(request, "home.html", {"cities": CITIES})
 
 
@@ -142,54 +186,15 @@ def user_appointments(request):
     return render(request, 'user-appointments.html', {'appointments': user_appointments})
 
 
-@login_required
 @require_http_methods(['DELETE'])
 def delete_appointment(request, pk):
-    # EVEN THO A MAN THAT IS NOT LOGGED IN CAN'T
-    # DELETE AN APPOINTMENT, LOGGED IN USER STILL
-    # CAN DELETE ANOTHER USER APPOINTMENTS BY TYPING
-    # PROPER URL. DONT FORGET TO FIX THAT HERE AND 
-    # IN ANOTHER VIEWS AS WELL.
-    UserAppointment.objects.get(AppID=pk).delete()
+    current_user = request.user
+    app = get_object_or_404(UserAppointment, userid_id=current_user, AppID=pk)
+    app.delete()
     return redirect('user-appointments')
 
 
-def transactions(request, pk):
-    # doesn't work properly
-    # don't fix this, add fake 3rd party transactions
-    if request.method == 'GET':
-        user_account = UserAccount.objects.get(Account_ID=pk) 
-        return render(request, 'transaction.html', {'account': user_account})
-    user_account = UserAccount.objects.get(Account_ID=pk)
-    UserTransaction.objects.create(
-        account_id=user_account,
-        Transaction_amount=(amount:= float(request.POST.get('amount'))))
-    user_account.Balance += amount
-    user_account.save()
-    return render(request, 'account-details.html', {'account': user_account})
-
-
-def account_transfer(request, pk):
-    # doesn't work properly
-    # don't fix this, add fake 3rd party transactions
-    if request.method == 'GET':
-        user_account = UserAccount.objects.get(Account_ID=pk) 
-        return render(request, 'transfer.html', {'account': user_account})
-    user_accounts = UserAccount.objects.filter(userid=request.user)
-    for account in user_accounts:
-        if account.Account_Type == 'Debit':
-            account.Balance -= float(request.POST.get('amount'))
-            if account.Balance < 0:
-                user_account = UserAccount.objects.get(Account_ID=pk)
-                return render(request, 'transfer.html', {'account': user_account, 'negative': True})
-            account.save()
-        else:
-            account.Balance += float(request.POST.get('amount'))
-            account.save()
-    user_account = UserAccount.objects.get(Account_ID=pk)
-    return render(request, 'account-details.html', {'account': user_account})
-
-
+@login_required
 def search(request):
     current_user = request.user
     user_appointments = UserAppointment.objects.filter(userid=current_user)
@@ -199,21 +204,49 @@ def search(request):
     return render(request, 'appointment-list.html', {'appointments': filtered})
 
 
+@require_http_methods(['DELETE'])
 def delete_user(request, pk):
-    # check if a user has money on balance, if does -> do not allow to delete
-    CustomUser.objects.get(UserID=pk).delete()
-    return redirect('home')
+    current_auth_user = vars(request.session).get('_session_cache').get('_auth_user_id')
+    current_user = get_user_model().objects.get(UserID=pk)
+    if int(current_auth_user) == current_user.UserID:
+        current_user.is_active = False
+        current_user.save()
+        messages.success(request, 'Your account has been deleted')
+        return redirect('home')
+    else:
+        messages.error(request, 'Forbidden, I"m CaLlInG tHe PoLiCe')
+        return redirect('home')
 
 
 def clear(request):
     return HttpResponse('')
 
 
-class SignUpView(CreateView):
-    form_class = CustomUserCreationForm
-    success_url = reverse_lazy('login')
-    template_name = 'registration/signup.html'
+@login_required
+def order(request, app_id):
+    order_obj = get_object_or_404(UserAppointment, AppID=app_id, userid_id=request.user)
+    if order_obj.paid: 
+        return redirect('home')
+    host = request.get_host()
+    paypal_dict = {
+        'business': settings.PAYPAL_RECEIVER_EMAIL,
+        'amount': str(order_obj.Price),
+        'item_name': f'Appointment N#{order_obj.AppID}',
+        'invoice': str(order_obj.AppID),
+        'currency_code': 'USD',
+        'notify_url': f'http://{host}{reverse("paypal-ipn")}',
+        'return_url': f'http://{host}{reverse("paypal-return")}',
+        'cancel_return': f'http://{host}{reverse("paypal-cancel")}',
+    }
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    return render(request, 'process_payment.html', {'form': form, 'order_details': order_obj})
 
 
-class Login(LoginView):
-    template_name = 'registration/login.html'
+def paypal_return(request):
+    messages.success(request, 'You\'ve successfully payed for an appointment!')
+    return redirect('home')
+
+
+def paypal_cancel(request):
+    messages.error(request, 'Order has been cancelled')
+    return redirect('home')

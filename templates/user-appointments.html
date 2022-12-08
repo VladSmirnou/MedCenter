@@ -1,5 +1,12 @@
+{% if messages %}
+    <ul class="messages" hx-get="{% url 'clear' %}" hx-trigger="load delay:3s">
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
 <form>
-    <label for="search">Search for a certain appointment (type an appointment number)</label>
+    <p>Search for a certain appointment (type an appointment number)</p>
     <p><input id="search" type="number" name="search" hx-get="{% url 'search' %}" hx-trigger="keyup delay:500ms" hx-target="#appointments"></p>
 </form>
 <div id="appointments">

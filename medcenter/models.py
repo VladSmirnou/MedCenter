@@ -1,8 +1,8 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils import timezone
-from .validators import validate_email, validate_phone, validate_users
+from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from .validators import validate_email, validate_phone, validate_users
 
 
 class CustomUser(AbstractUser):
@@ -13,7 +13,7 @@ class CustomUser(AbstractUser):
         db_column="UserFirst_Name",
         verbose_name="First name",
         help_text=_(
-        "This fields is required. Should be more than or equal to 5 \
+        "This fields is required. Should be more than or equal to 2 \
         and less than or equal to 25 characters. Accepts only lower and upper letters and digits."
         ),
     )
@@ -23,7 +23,7 @@ class CustomUser(AbstractUser):
         db_column="UserLast_Name",
         verbose_name="Last name",
         help_text=_(
-        "This fields is required. Should be more than or equal to 5 \
+        "This fields is required. Should be more than or equal to 2 \
         and less than or equal to 25 characters. Accepts only lower and upper letters and digits."
         ),
     )
@@ -33,20 +33,19 @@ class CustomUser(AbstractUser):
         blank=True,
         verbose_name="Mobile phone",
         help_text=_(
-            "Not required. Standart format is -> +XXX (XX) XXX-XXX-XXXX"
+            "Not required. Standart format is -> +XXX (XX) XXX-XX-XX"
         ),
     )
     email = models.EmailField(
-        max_length=128,
+        unique=True,
         validators=[validate_email],
-        blank=True,
         db_column='UserEmail',
     )
 
-    REQUIRED_FIELDS = ["first_name", "last_name"]
+    REQUIRED_FIELDS = ["first_name", "last_name", "email"]
 
     def __str__(self):
-        return f"User ID: {self.UserID}"
+        return f"User ID: {self.UserID}, {self.username}"
 
 
 class Employee(models.Model):
@@ -65,29 +64,6 @@ class Employee(models.Model):
         return f"Employee ID: {self.EmpID}; Full name: {self.EmpFirst_Name} {self.EmpLast_Name}"
 
 
-class UserAccount(models.Model):
-    Account_ID = models.BigAutoField(primary_key=True)
-    userid = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    Account_Type = models.CharField(max_length=6)
-    Balance = models.FloatField(default=0)
-
-    def __str__(self):
-        return f"Account ID: {self.Account_ID}, {self.userid}"
-
-
-class UserTransaction(models.Model):
-    TransactionID = models.BigAutoField(primary_key=True)
-    account_id = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
-    empid = models.ForeignKey(
-        Employee, null=True, blank=True, on_delete=models.SET_NULL
-    )
-    Transaction_time = models.DateTimeField(default=timezone.now)
-    Transaction_amount = models.FloatField()
-
-    def __str__(self):
-        return f"Transaction ID: {self.TransactionID}, {self.account_id}"
-
-
 class UserAppointment(models.Model):
     AppID = models.BigAutoField(primary_key=True)
     empid = models.ForeignKey(
@@ -98,4 +74,13 @@ class UserAppointment(models.Model):
     AppClinicName = models.CharField(max_length=20)
     AppMedCategory = models.CharField(max_length=40)
     AppDoctor_Full_Name = models.CharField(max_length=30)
+    Price = models.IntegerField()
+    paid = models.BooleanField(default=False)
     
+    def __str__(self):
+        return f'{self.AppCity},\
+            {self.AppClinicName},\
+            {self.AppMedCategory},\
+            {self.AppDoctor_Full_Name},\
+            Price is {self.Price} USD,\
+            Paid: {"Yes!" if self.paid else "Not yet"}' 

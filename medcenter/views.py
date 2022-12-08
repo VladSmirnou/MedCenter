@@ -206,9 +206,9 @@ def search(request):
 
 @require_http_methods(['DELETE'])
 def delete_user(request, pk):
-    current_auth_user = vars(request.session).get('_session_cache').get('_auth_user_id')
-    current_user = get_user_model().objects.get(UserID=pk)
-    if int(current_auth_user) == current_user.UserID:
+    request_user = request.user
+    current_user = get_object_or_404(get_user_model(), UserID=pk)
+    if request_user == current_user:
         current_user.is_active = False
         current_user.save()
         messages.success(request, 'Your account has been deleted')

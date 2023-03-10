@@ -5,15 +5,21 @@ The main idea was to create a chained drop-down list with at least 4 choices usi
 
 ## Installation
 ```
-Install requirements.txt
-Set environment variables from .env-template
-Migrate DB 
-Smtp backend is enabled by default, so change it first if you don't want to send a real email
+Manually:
+  Install requirements.txt
+  Set environment variables from .env-template
+  Migrate DB 
+  Smtp backend is disabled by default
+  PostgreSQL backends activated by default, comment it out and uncomment SQLite backends if you want to
+Docker compose:
+  Set environment variables from .env-template
+  Run docker compose command
 ```
 ## Features 
 ```
 PayPal integration
 Dynamic pages without writing any JavaScript code
+Docker compose support
 ```
 ## Features review
 - For the PayPal integration i'm using https://django-paypal.readthedocs.io/en/latest/overview.html library.

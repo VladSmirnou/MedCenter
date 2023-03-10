@@ -1,6 +1,7 @@
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth import views as auth_views 
 from django.urls import path
+
 from medcenter.utils import inactive_user_clean
 
 from .views import (
@@ -28,6 +29,9 @@ urlpatterns = [
     path('activate/<uidb64>/<token>/', activate, name='activate'),
     path('login/', Login.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+
+
+
     path('password-reset/',
     auth_views.PasswordResetView.as_view(
         template_name='password_reset_templates/password_reset.html'),
@@ -46,6 +50,9 @@ urlpatterns = [
         template_name='password_reset_templates/password_reset_complete.html'),
         name='password_reset_complete'
     ),
+
+
+
     path('order/<int:app_id>/', order, name='order'),
     path('paypal-return/', paypal_return, name='paypal-return'),
     path('paypal-cancel/', paypal_cancel, name='paypal-cancel'),

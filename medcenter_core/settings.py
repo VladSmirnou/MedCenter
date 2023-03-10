@@ -75,17 +75,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "medcenter_core.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
+DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -139,15 +139,16 @@ LOGOUT_REDIRECT_URL = "home"
 
 
 # email verification config
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-email = env.dj_email_url("EMAIL_URL", default="smtp://")
-DEFAULT_FROM_EMAIL = email["DEFAULT_FROM_EMAIL"]
-EMAIL_HOST = email["EMAIL_HOST"]
-EMAIL_PORT = email["EMAIL_PORT"]
-EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
-EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
-EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
+# email = env.dj_email_url("EMAIL_URL", default="smtp://")
+# DEFAULT_FROM_EMAIL = email["DEFAULT_FROM_EMAIL"]
+# EMAIL_HOST = email["EMAIL_HOST"]
+# EMAIL_PORT = email["EMAIL_PORT"]
+# EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
+# EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
+# EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
 
 PASSWORD_RESET_TIMEOUT = 10800
 

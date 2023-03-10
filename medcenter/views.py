@@ -25,7 +25,7 @@ CITIES = ('City1', 'City2')
 CENTERS = ('Center1', 'Center2', 'Center3', 'Center4')
 MED_TYPE = ('Cardiology', 'Eye care', 'Psycology', 'Primary care')
 DOCTORS = (
-    {'Cardiolog1': ['Super cool', 15] , 'Cardiolog2': ['Amaizing', 12]},
+    {'Cardiolog1': ['Super cool', 15], 'Cardiolog2': ['Amaizing', 12]},
     {'Eye Doc1': ['Nice', 11], 'Eye Doc2': ['Good one', 13]},
     {'Psycologist1': ['Trustfull', 13], 'Psycologist2': ['Gorgeous', 12]},
     {'Terapist1': ['Fabilous', 12], 'Terapist2': ['Spectacular', 14]}
@@ -206,16 +206,16 @@ def search(request):
 
 @require_http_methods(['DELETE'])
 def delete_user(request, pk):
-    current_auth_user = vars(request.session).get('_session_cache').get('_auth_user_id')
-    current_user = get_user_model().objects.get(UserID=pk)
-    if int(current_auth_user) == current_user.UserID:
+    request_user = request.user
+    current_user = get_object_or_404(get_user_model(), UserID=pk)
+    if request_user == current_user:
         current_user.is_active = False
         current_user.save()
         messages.success(request, 'Your account has been deleted')
         return redirect('home')
     else:
         messages.error(request, 'Forbidden, I"m CaLlInG tHe PoLiCe')
-        return redirect('home')
+    return redirect('home')
 
 
 def clear(request):
